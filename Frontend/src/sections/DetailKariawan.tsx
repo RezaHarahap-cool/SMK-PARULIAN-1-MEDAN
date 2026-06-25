@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Loader2, Search } from "lucide-react";
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "http://187.127.121.139:3000";
 const DEFAULT_IMAGE = `${API_BASE_URL}/uploads/general_profil.png`;
 
 interface ApiGuru {
