@@ -1,0 +1,518 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id_users             String                @id @default(uuid()) @db.Uuid
+  username             String                @unique @db.VarChar(50)
+  password             String                @db.VarChar(255)
+  email                String                @unique @db.VarChar(100)
+  role                 Role
+  is_active            Boolean               @default(true)
+  created_at           DateTime              @default(now()) @db.Timestamp(0)
+  updated_at           DateTime              @updatedAt @db.Timestamp(0)
+  resetPasswordToken   String?
+  resetPasswordExpires DateTime?
+  admin                AdminProfile?
+  guru                 GuruProfile?
+  kepala_sekolah       KepalaSekolahProfile?
+  siswa                SiswaProfile?
+
+  @@map("users")
+}
+
+model AdminProfile {
+  id_admin      String        @id @default(uuid()) @db.Uuid
+  users_id      String        @unique @db.Uuid
+  nama_admin    String        @db.VarChar(50)
+  jenis_kelamin GenderLengkap
+  no_hp         String        @db.VarChar(20)
+  foto          String?       @db.VarChar(255)
+  user          User          @relation(fields: [users_id], references: [id_users], onDelete: Cascade)
+  berita        Berita[]
+
+  @@map("admin_profiles")
+}
+
+model GuruProfile {
+  id_guru               String                 @id @default(uuid()) @db.Uuid
+  users_id              String                 @unique @db.Uuid
+  nama_guru             String                 @db.VarChar(50)
+  tgl_lahir             DateTime               @db.Timestamp(0)
+  gender                GenderSingkat
+  agama                 String                 @db.VarChar(50)
+  pendidikan_tertinggi  String                 @db.VarChar(50)
+  no_hp                 String                 @db.VarChar(20)
+  foto                  String?                @db.VarChar(255)
+  mapel_id              String?                @db.Uuid
+  mata_pelajaran        MataPelajaran?         @relation(fields: [mapel_id], references: [id_mapel], onDelete: SetNull)
+  user                  User                   @relation(fields: [users_id], references: [id_users], onDelete: Cascade)
+  jadwal_mengajar       Jadwal[]
+  kelas_wali            Kelas[]
+  mengajar              Mengajar[]
+  rapor_catatan_wali    RaporCatatanWali[]
+  rapor_ekstrakurikuler RaporEkstrakurikuler[]
+  rapor_prakerin_wali   RaporPrakerinWali[]
+
+  @@map("guru_profiles")
+}
+
+model SiswaProfile {
+  id_siswa         String                    @id @default(uuid()) @db.Uuid
+  users_id         String                    @unique @db.Uuid
+  npsn             String?                   @db.VarChar(20)
+  nis              String                    @db.VarChar(20)
+  nisn             String                    @unique @db.VarChar(20)
+  foto             String?                   @db.VarChar(255)
+  nama_siswa       String                    @db.VarChar(255)
+  gender           GenderSingkat
+  tempat_tgl_lahir String                    @db.VarChar(55)
+  nama_ayah        String                    @db.VarChar(55)
+  pekerjaan_ayah   String                    @db.VarChar(55)
+  nama_ibu         String                    @db.VarChar(55)
+  pekerjaan_ibu    String                    @db.VarChar(55)
+  alamat           String
+  desa_kelurahan   String                    @map("desa/kelurahan") @db.VarChar(55)
+  kecamatan        String                    @db.VarChar(55)
+  kabupaten_kota   String                    @map("kabupaten/kota") @db.VarChar(55)
+  provinsi         String                    @db.VarChar(55)
+  no_hp_wali       String                    @db.VarChar(55)
+  status_siswa     String                    @default("Aktif") @db.VarChar(20)
+  tahun_lulus      Int?
+  absensi          Absensi[]
+  nilai_tugas      NilaiTugas[]
+  pas              PenilaianAkhirSemester[]
+  penilaian_harian PenilaianHarian[]
+  pts              PenilaianTengahSemester[]
+  riwayat_kelas    RiwayatKelasSiswa[]
+  user             User                      @relation(fields: [users_id], references: [id_users], onDelete: Cascade)
+
+  @@map("siswa_profiles")
+}
+
+model KepalaSekolahProfile {
+  id_kepsek            String              @id @default(uuid()) @db.Uuid
+  users_id             String              @unique @db.Uuid
+  nama_ks              String              @db.VarChar(50)
+  tgl_lahir            DateTime            @db.Timestamp(0)
+  gender               GenderSingkat
+  agama                String              @db.VarChar(50)
+  pendidikan_tertinggi String              @db.VarChar(20)
+  no_hp                String?             @db.VarChar(20)
+  mulai_menjabat       DateTime?           @db.Timestamp(0)
+  selesai_menjabat     DateTime?           @db.Timestamp(0)
+  status_jabatan       StatusJabatanKepsek @default(AKTIF)
+  foto                 String?             @db.VarChar(255)
+  user                 User                @relation(fields: [users_id], references: [id_users], onDelete: Cascade)
+  rapor                Rapor[]
+  rapor_prakerin_wali  RaporPrakerinWali[]
+
+  @@map("kepala_sekolah_profiles")
+}
+
+model MataPelajaran {
+  id_mapel String        @id @default(uuid()) @db.Uuid
+  mapel    String        @db.VarChar(120)
+  kelompok KelompokMapel @default(UMUM)
+  gurus    GuruProfile[]
+  jadwal   Jadwal[]
+  mengajar Mengajar[]
+
+  @@map("mata_pelajaran")
+}
+
+model Jurusan {
+  id_jurusan String        @id @default(uuid()) @db.Uuid
+  jurusan    String        @db.VarChar(55)
+  status     StatusJurusan
+  kelas      Kelas[]
+
+  @@map("jurusan")
+}
+
+model Kelas {
+  id_kelas        String               @id @default(uuid()) @db.Uuid
+  nama_kelas      String               @db.VarChar(50)
+  ruang_kelas     String               @db.VarChar(50)
+  guru_id         String?              @db.Uuid
+  jurusan_id      String               @db.Uuid
+  tahun_ajaran_id String               @db.Uuid
+  status          StatusKeaktifanKelas @default(AKTIF)
+  wali_kelas      GuruProfile?         @relation(fields: [guru_id], references: [id_guru])
+  jurusan         Jurusan              @relation(fields: [jurusan_id], references: [id_jurusan])
+  tahun_ajaran    TahunAjaran          @relation(fields: [tahun_ajaran_id], references: [id_tahun_ajaran])
+
+  jadwal        Jadwal[]
+  mengajar      Mengajar[]
+  riwayat_siswa RiwayatKelasSiswa[]
+
+  @@map("kelas")
+}
+
+model RiwayatKelasSiswa {
+  id_riwayat            String                 @id @default(uuid()) @db.Uuid
+  siswa_id              String                 @db.Uuid
+  kelas_id              String                 @db.Uuid
+  tahun_ajaran_id       String                 @db.Uuid
+  status_kenaikan       StatusKelas
+  rapor                 Rapor[]
+  rapor_catatan_wali    RaporCatatanWali[]
+  rapor_ekstrakurikuler RaporEkstrakurikuler[]
+  rapor_prakerin_wali   RaporPrakerinWali[]
+  kelas                 Kelas                  @relation(fields: [kelas_id], references: [id_kelas], onDelete: Cascade)
+  siswa                 SiswaProfile           @relation(fields: [siswa_id], references: [id_siswa], onDelete: Cascade)
+  tahun_ajaran          TahunAjaran            @relation(fields: [tahun_ajaran_id], references: [id_tahun_ajaran])
+
+  @@map("riwayat_kelas_siswa")
+}
+
+model TahunAjaran {
+  id_tahun_ajaran String              @id @default(uuid()) @db.Uuid
+  tahun           String              @db.VarChar(55)
+  status          StatusTahunAjaran
+  absensi         Absensi[]
+  jadwal          Jadwal[]
+  mengajar        Mengajar[]
+  riwayat_siswa   RiwayatKelasSiswa[]
+  kelas           Kelas[]
+
+  @@map("tahun_ajaran")
+}
+
+model Jadwal {
+  id_jadwal       String        @id @default(uuid()) @db.Uuid
+  kelas_id        String        @db.Uuid
+  mapel_id        String        @db.Uuid
+  guru_id         String        @db.Uuid
+  tahun_ajaran_id String        @db.Uuid
+  mengajar_id     String?       @db.Uuid
+  hari            NamaHari
+  jam_mulai       String        @db.VarChar(10)
+  jam_berakhir    String        @db.VarChar(10)
+  les             Int
+  guru            GuruProfile   @relation(fields: [guru_id], references: [id_guru], onDelete: Cascade)
+  kelas           Kelas         @relation(fields: [kelas_id], references: [id_kelas], onDelete: Cascade)
+  mapel           MataPelajaran @relation(fields: [mapel_id], references: [id_mapel], onDelete: Cascade)
+  mengajar        Mengajar?     @relation(fields: [mengajar_id], references: [id_mengajar], onDelete: SetNull)
+  tahun_ajaran    TahunAjaran   @relation(fields: [tahun_ajaran_id], references: [id_tahun_ajaran])
+
+  @@index([kelas_id, tahun_ajaran_id])
+  @@index([guru_id, tahun_ajaran_id])
+  @@index([mengajar_id])
+  @@map("jadwal")
+}
+
+model Berita {
+  id_berita         String       @id @default(uuid()) @db.Uuid
+  foto              String?      @db.VarChar(255)
+  judul             String       @db.VarChar(50)
+  content           String
+  admin_id          String       @db.Uuid
+  jenis_berita      JenisBerita
+  tanggal_publikasi DateTime     @default(now()) @db.Timestamp(0)
+  admin             AdminProfile @relation(fields: [admin_id], references: [id_admin], onDelete: Cascade)
+
+  @@map("berita")
+}
+
+model Semester {
+  id_semester           String                 @id @default(uuid()) @db.Uuid
+  semester              JenisSemester
+  status                StatusSemester
+  absensi               Absensi[]
+  mengajar              Mengajar[]
+  rapor                 Rapor[]
+  rapor_catatan_wali    RaporCatatanWali[]
+  rapor_ekstrakurikuler RaporEkstrakurikuler[]
+  rapor_prakerin_wali   RaporPrakerinWali[]
+
+  @@map("semesters")
+}
+
+model Mengajar {
+  id_mengajar      String                    @id @default(uuid()) @db.Uuid
+  guru_id          String                    @db.Uuid
+  mapel_id         String                    @db.Uuid
+  kelas_id         String                    @db.Uuid
+  tahun_ajaran_id  String                    @db.Uuid
+  semester_id      String                    @db.Uuid
+  total_pertemuan  Int
+  absensi          Absensi[]
+  guru             GuruProfile               @relation(fields: [guru_id], references: [id_guru], onDelete: Cascade)
+  jadwal           Jadwal[]
+  kelas            Kelas                     @relation(fields: [kelas_id], references: [id_kelas], onDelete: Cascade)
+  mapel            MataPelajaran             @relation(fields: [mapel_id], references: [id_mapel], onDelete: Cascade)
+  semester         Semester                  @relation(fields: [semester_id], references: [id_semester], onDelete: Cascade)
+  tahun_ajaran     TahunAjaran               @relation(fields: [tahun_ajaran_id], references: [id_tahun_ajaran], onDelete: Cascade)
+  nilai_tugas      NilaiTugas[]
+  pas              PenilaianAkhirSemester[]
+  penilaian_harian PenilaianHarian[]
+  pts              PenilaianTengahSemester[]
+  rapor            Rapor[]
+
+  @@map("mengajar")
+}
+
+model Absensi {
+  id_absensi      String       @id @default(uuid()) @db.Uuid
+  tahun_ajaran_id String       @db.Uuid
+  semester_id     String       @db.Uuid
+  siswa_id        String       @db.Uuid
+  mengajar_id     String       @db.Uuid
+  tgl_absensi     DateTime     @db.Timestamp(0)
+  topik           String       @db.VarChar(55)
+  pertemuan       String       @db.VarChar(55)
+  keterangan      String       @db.VarChar(55)
+  catatan_sikap   String?      @db.VarChar(55)
+  mengajar        Mengajar     @relation(fields: [mengajar_id], references: [id_mengajar], onDelete: Cascade)
+  semester        Semester     @relation(fields: [semester_id], references: [id_semester])
+  siswa           SiswaProfile @relation(fields: [siswa_id], references: [id_siswa], onDelete: Cascade)
+  tahun_ajaran    TahunAjaran  @relation(fields: [tahun_ajaran_id], references: [id_tahun_ajaran])
+
+  @@map("absensi")
+}
+
+model NilaiTugas {
+  id_nilai_tugas String             @id @default(uuid()) @db.Uuid
+  mengajar_id    String             @db.Uuid
+  siswa_id       String             @db.Uuid
+  penilaian_ke   EnumPenilaianTugas
+  nilai_tugas    Int
+  jenis_nilai    JenisNilai
+  mengajar       Mengajar           @relation(fields: [mengajar_id], references: [id_mengajar], onDelete: Cascade)
+  siswa          SiswaProfile       @relation(fields: [siswa_id], references: [id_siswa], onDelete: Cascade)
+
+  @@map("nilai_tugas")
+}
+
+model PenilaianHarian {
+  id_penilaian_harian    String              @id @default(uuid()) @db.Uuid
+  mengajar_id            String              @db.Uuid
+  siswa_id               String              @db.Uuid
+  penilaian_ke           EnumPenilaianHarian
+  nilai_penilaian_harian Int
+  jenis_nilai            JenisNilai
+  mengajar               Mengajar            @relation(fields: [mengajar_id], references: [id_mengajar], onDelete: Cascade)
+  siswa                  SiswaProfile        @relation(fields: [siswa_id], references: [id_siswa], onDelete: Cascade)
+
+  @@map("penilaian_harian")
+}
+
+model PenilaianTengahSemester {
+  id_penilaian_tengah_semester String       @id @default(uuid()) @db.Uuid
+  mengajar_id                  String       @db.Uuid
+  siswa_id                     String       @db.Uuid
+  pts                          Int
+  mengajar                     Mengajar     @relation(fields: [mengajar_id], references: [id_mengajar], onDelete: Cascade)
+  siswa                        SiswaProfile @relation(fields: [siswa_id], references: [id_siswa], onDelete: Cascade)
+
+  @@map("penilaian_tengah_semester")
+}
+
+model PenilaianAkhirSemester {
+  id_penilaian_akhir_semester String       @id @default(uuid()) @db.Uuid
+  mengajar_id                 String       @db.Uuid
+  siswa_id                    String       @db.Uuid
+  pas                         Int
+  mengajar                    Mengajar     @relation(fields: [mengajar_id], references: [id_mengajar], onDelete: Cascade)
+  siswa                       SiswaProfile @relation(fields: [siswa_id], references: [id_siswa], onDelete: Cascade)
+
+  @@map("penilaian_akhir_semester")
+}
+
+model Rapor {
+  id_rapor               String                @id @default(uuid()) @db.Uuid
+  riwayat_kelas_siswa_id String                @db.Uuid
+  mengajar_id            String                @db.Uuid
+  semester_id            String                @db.Uuid
+  kktp                   String                @db.VarChar(55)
+  nilai_akhir            Decimal               @db.Decimal(5, 2)
+  capaian_kompetensi     String
+  status_acc             StatusAccRapor        @default(PENDING)
+  kepala_sekolah_id      String?               @db.Uuid
+  tgl_acc                DateTime?             @db.Timestamp(0)
+  kepala_sekolah         KepalaSekolahProfile? @relation(fields: [kepala_sekolah_id], references: [id_kepsek])
+  mengajar               Mengajar              @relation(fields: [mengajar_id], references: [id_mengajar], onDelete: Cascade)
+  riwayat_kelas_siswa    RiwayatKelasSiswa     @relation(fields: [riwayat_kelas_siswa_id], references: [id_riwayat], onDelete: Cascade)
+  semester               Semester              @relation(fields: [semester_id], references: [id_semester])
+
+  @@map("rapor")
+}
+
+model RaporPrakerinWali {
+  id_rapor_prakerin_wali String                @id @default(uuid()) @db.Uuid
+  riwayat_kelas_siswa_id String               @db.Uuid
+  semester_id            String               @db.Uuid
+  wali_kelas_id          String               @db.Uuid
+  kktp                   String               @db.VarChar(55)
+  nilai_akhir            Decimal              @db.Decimal(5, 2)
+  capaian_kompetensi     String
+  status_acc             StatusAccRapor       @default(PENDING)
+  kepala_sekolah_id      String?              @db.Uuid
+  tgl_acc                DateTime?            @db.Timestamp(0)
+  kepala_sekolah         KepalaSekolahProfile? @relation(fields: [kepala_sekolah_id], references: [id_kepsek])
+  riwayat_kelas_siswa    RiwayatKelasSiswa    @relation(fields: [riwayat_kelas_siswa_id], references: [id_riwayat], onDelete: Cascade)
+  semester               Semester             @relation(fields: [semester_id], references: [id_semester], onDelete: Cascade)
+  wali_kelas             GuruProfile          @relation(fields: [wali_kelas_id], references: [id_guru])
+
+  @@unique([riwayat_kelas_siswa_id, semester_id])
+  @@map("rapor_prakerin_wali")
+}
+
+model Ekstrakurikuler {
+  id_ekstrakurikuler String                 @id @default(uuid()) @db.Uuid
+  nama               String                 @unique @db.VarChar(100)
+  status             StatusEkstrakurikuler  @default(AKTIF)
+  rapor              RaporEkstrakurikuler[]
+
+  @@map("ekstrakurikuler")
+}
+
+model RaporEkstrakurikuler {
+  id_rapor_ekstrakurikuler String                  @id @default(uuid()) @db.Uuid
+  riwayat_kelas_siswa_id   String                  @db.Uuid
+  semester_id              String                  @db.Uuid
+  ekstrakurikuler_id       String                  @db.Uuid
+  wali_kelas_id            String                  @db.Uuid
+  predikat                 PredikatEkstrakurikuler
+  keterangan               String?
+  ekstrakurikuler          Ekstrakurikuler         @relation(fields: [ekstrakurikuler_id], references: [id_ekstrakurikuler], onDelete: Cascade)
+  riwayat_kelas_siswa      RiwayatKelasSiswa       @relation(fields: [riwayat_kelas_siswa_id], references: [id_riwayat], onDelete: Cascade)
+  semester                 Semester                @relation(fields: [semester_id], references: [id_semester], onDelete: Cascade)
+  wali_kelas               GuruProfile             @relation(fields: [wali_kelas_id], references: [id_guru])
+
+  @@unique([riwayat_kelas_siswa_id, semester_id, ekstrakurikuler_id])
+  @@map("rapor_ekstrakurikuler")
+}
+
+model RaporCatatanWali {
+  id_catatan_wali        String            @id @default(uuid()) @db.Uuid
+  riwayat_kelas_siswa_id String            @db.Uuid
+  semester_id            String            @db.Uuid
+  wali_kelas_id          String            @db.Uuid
+  catatan                String?
+  riwayat_kelas_siswa    RiwayatKelasSiswa @relation(fields: [riwayat_kelas_siswa_id], references: [id_riwayat], onDelete: Cascade)
+  semester               Semester          @relation(fields: [semester_id], references: [id_semester], onDelete: Cascade)
+  wali_kelas             GuruProfile       @relation(fields: [wali_kelas_id], references: [id_guru])
+
+  @@unique([riwayat_kelas_siswa_id, semester_id])
+  @@map("rapor_catatan_wali")
+}
+
+enum Role {
+  siswa
+  guru
+  admin
+  kepala_sekolah
+}
+
+enum GenderLengkap {
+  Laki_laki
+  Perempuan
+}
+
+enum StatusJurusan {
+  AKTIF
+  NON_AKTIF
+}
+
+enum GenderSingkat {
+  Wanita
+  Pria
+}
+
+enum StatusTahunAjaran {
+  AKTIF
+  NON_AKTIF
+}
+
+enum StatusKelas {
+  Sedang_Belajar
+  Naik_Kelas
+  Tinggal_Kelas
+  Tamat
+}
+
+enum JenisBerita {
+  Pengumuman
+  Kegiatan_Prestasi
+  Akademik
+}
+
+enum NamaHari {
+  Senin
+  Selasa
+  Rabu
+  Kamis
+  Jumat
+  Sabtu
+}
+
+enum JenisSemester {
+  GENAP
+  GANJIL
+}
+
+enum StatusSemester {
+  NON_AKTIF
+  AKTIF
+}
+
+enum EnumPenilaianTugas {
+  TUGAS_1
+  TUGAS_2
+  TUGAS_3
+  TUGAS_4
+}
+
+enum EnumPenilaianHarian {
+  PH_1
+  PH_2
+  PH_3
+  PH_4
+}
+
+enum JenisNilai {
+  KETERAMPILAN
+  PENGETAHUAN
+}
+
+enum StatusAccRapor {
+  PENDING
+  DISETUJUI
+}
+
+enum StatusKeaktifanKelas {
+  AKTIF
+  NON_AKTIF
+}
+
+enum StatusJabatanKepsek {
+  AKTIF
+  NON_AKTIF
+}
+
+enum StatusEkstrakurikuler {
+  AKTIF
+  NON_AKTIF
+}
+
+enum PredikatEkstrakurikuler {
+  SANGAT_BAIK
+  BAIK
+  CUKUP
+  KURANG
+  SANGAT_BURUK
+}
+
+enum KelompokMapel {
+  UMUM
+  MULOK
+  KEJURUAN
+}

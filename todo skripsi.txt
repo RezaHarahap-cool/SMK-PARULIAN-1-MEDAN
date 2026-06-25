@@ -1,0 +1,116 @@
+TODO YANG MAU DI KERJAKAN
+
+1.BUAT FITUR BACA BERITA ✅
+2.GANTI FOTO DI BAGIAN TAMPILAN PUBLIK (on progres)
+3.BERISHKAN KODE AI ATAU KOMENTAR AI DAN BERISHKAN FOLDER DARI SEBELUMNYA ()
+4.
+bagian siswa belom bener
+password nya 6 car
+no hp masih bisa input text
+
+
+
+(Bagain halaman admin)
+Dasbord✅
+data guru✅
+data siswa✅
+data kepala sekolah✅
+jurusan✅
+mapel✅
+riwayat kelas siswa✅
+roster ✅
+data kelas ✅
+tahun ajaran✅
+berita ✅
+cetak raport
+kenaikan kelas✅
+alumni✅
+penambahan popup atau alert yang baru ✅
+kelas, penambahan tahun ajaran
+mengajar, penambahan tahun ajaran ✅
+
+(Bagian Halaman Siswa)
+Profile ✅
+sidebar ✅
+absensi ✅
+raport 
+roster ✅
+
+(Bagian Halaman guru)
+Profile ✅
+sidebar ✅
+presensi ✅
+tabel presensi
+nilai ✅
+tabel nilai✅
+jadwal mengajar✅
+laporan wali murid ✅
+pengecekan wali kelas jika wali kelas tampilkan menu laporan ✅
+guru1
+123
+
+(Bagian kepala sekolah)
+Profile ✅
+sidebar ✅
+Verivikasi raport ✅
+rapikan alert yang ada ✅
+
+text-white bg-red-600 hover:bg-red-700 shadow-sm transition-colors
+bg-black text-white hover:bg-gray-800 transition-colors shadow-lg
+fitur lupa password pakai email
+export raport
+085185614180
+085296676478
+db-parulian-akademik1234
+http://localhost:8080
+
+
+
+14.Tabel Nilai Tugas
+Tabel “nilai_tugas” digunakan untuk menyimpan data nilai tugas siswa dalam sistem informasi akademik.
+Tabel 3.38 Tabel Nilai Tugas
+nilai_tugas
+Nama Field	Tipe Data
+id_nilai_tugas (PK)	string uuid
+mengajar_id (FK)	string uuid
+siswa_id (FK)	string uuid
+penilain ke     ENUM "TUGAS_1", "TUGAS_2", "TUGAS_3", "TUGAS_4"
+Nilai_tugas     Int
+jenis_nilai	ENUM "KETERAMPILAN", "PENGETAHUAN"
+
+
+
+15.Tabel Penilaian Harian (PH)
+Tabel “penilaian_harian” digunakan untuk menyimpan data nilai harian siswa dalam sistem informasi akademik.
+Tabel 3.39 Tabel Penilaian Harian
+penilaian_harian
+Nama Field	Tipe Data
+id_penilaian_harian (PK)	string uuid
+mengajar_id (FK)	string uuid
+siswa_id (FK)	string uuid
+Penilaian ke ENUM "PH_1", "PH_2", "PH_3", "PH_4"
+Nilai_penilaian_harian     Int
+jenis_nilai	ENUM "KETERAMPILAN", "PENGETAHUAN"
+
+
+16.Tabel Penilaian Tengah Semester (PTS)
+Tabel “penilaian_tengah_semester” digunakan untuk menyimpan data nilai tengah semester siswa dalam sistem informasi akademik. 
+Tabel 3.40 Tabel Penilaian Tengah Semester
+penilaian_tengah_semester
+Nama Field	Tipe Data
+id_penilaian_tengah_semester (PK)	string uuid
+mengajar_id (FK)	string uuid
+siswa_id (FK)	string uuid
+pts	Int
+
+
+
+17.Tabel Penilaian Akhir Semester (PAS)
+Tabel “penilaian_akhir_semester” digunakan untuk menyimpan data nilai akhir semester siswa dalam sistem informasi akademik. 
+Tabel 3.41 Tabel Penilaian Tengah Semester
+penilaian_akhir_semester
+Nama Field	Tipe Data
+id_penilaian_akhir_semester (PK)	string uuid
+mengajar_id (FK)	string uuid
+siswa_id (FK)	string uuid
+pas	Int

@@ -1,0 +1,1 @@
+ALTER TABLE "mata_pelajaran" ALTER COLUMN "mapel" TYPE VARCHAR(120);

@@ -1,0 +1,5 @@
+providers = ["node"]
+
+[phases.setup]
+# Perintah ini menyuruh Railway menginstal Chromium via APT (package manager Ubuntu)
+pkgs = ["...", "chromium"]
